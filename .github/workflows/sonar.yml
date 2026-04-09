@@ -1,0 +1,45 @@
+name: SonarCloud Scan
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      # Fix module path
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=." >> $GITHUB_ENV
+
+      # Run tests and generate coverage
+      - name: Run tests with coverage
+        run: pytest --cov=app --cov-report=xml
+
+      # Debug (optional but useful)
+      - name: Verify coverage file
+        run: ls -la
+
+      # SonarCloud Scan
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
