@@ -26,12 +26,15 @@ jobs:
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=." >> $GITHUB_ENV
 
+      # 🔥 FIXED STEP (added junit report)
       - name: Run tests with coverage
         run: |
           pytest \
             --cov=app \
             --cov-report=xml:coverage.xml \
-            --junitxml=pytest-report.xml
+            --cov-report=term \
+            --junitxml=pytest-report.xml \
+            --cov-config=.coveragerc
 
       - name: Verify reports
         run: |
