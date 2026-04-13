@@ -25,14 +25,17 @@ jobs:
         run: echo "PYTHONPATH=." >> $GITHUB_ENV
 
       - name: Run tests with coverage
-        run: pytest --cov=app --cov-report=xml
+        run: pytest --cov=app --cov-report=xml:coverage.xml
 
       - name: Check coverage file
         run: |
-          echo "Listing files..."
           ls -la
-          echo "Check coverage.xml..."
-          cat coverage.xml || echo "coverage.xml NOT FOUND"
+          cat coverage.xml
+
+      # 🔥 ADD THIS STEP (CRITICAL)
+      - name: Fix coverage paths
+        run: |
+          sed -i 's|/home/runner/work/.*/app|app|g' coverage.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
