@@ -10,9 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -25,19 +27,26 @@ jobs:
         run: echo "PYTHONPATH=." >> $GITHUB_ENV
 
       - name: Run tests with coverage
-        run: pytest --cov=app --cov-report=xml:coverage.xml
-
-      - name: Check coverage file
         run: |
+          pytest \
+            --cov=app \
+            --cov-report=xml:coverage.xml \
+            --junitxml=pytest-report.xml
+
+      - name: Verify reports
+        run: |
+          echo "Files in workspace:"
           ls -la
+          echo "---- coverage.xml ----"
           cat coverage.xml
-
-      # 🔥 ADD THIS STEP (CRITICAL)
-      - name: Fix coverage paths
-        run: |
-          sed -i 's|/home/runner/work/.*/app|app|g' coverage.xml
+          echo "---- pytest-report.xml ----"
+          cat pytest-report.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          args: >
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.python.xunit.reportPath=pytest-report.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
